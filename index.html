@@ -35,11 +35,11 @@
       document.body.appendChild( renderer.domElement );
      
       
-      var geometry = new THREE.SphereGeometry(2);
-      var material = new THREE.MeshNormalMaterial({ color: 0x00ff00, wireframe:true });
+      //var geometry = new THREE.SphereGeometry(2);
+      //var material = new THREE.MeshNormalMaterial({ color: 0x00ff00, wireframe:true });
       //var material = new THREE.MeshNormalMaterial();
-      var cube = new THREE.Mesh( geometry, material );
-      scene.add( cube );
+      //var cube = new THREE.Mesh( geometry, material );
+      //scene.add( cube );
 
       camera.position.z = 5;
     
@@ -53,16 +53,29 @@
       light.position.set(-100,200,100);
       scene.add(light);
       */
+
+      var mesh = null;
+      function initMesh(){
+        var loader = new THREE.JSONLoader();
+        loader.load('obj/tree.json', function(geometry){
+          mesh = new THREE.Mesh(geometry);
+          scene.add(mesh);
+        });
+      }
+
+
+      //Onde a mágica acontece
       function render() {
           requestAnimationFrame( render );
           
-          cube.rotation.x += 0.01;
-          cube.rotation.y += 0.01;
+          mesh.rotation.x += 0.01;
+          //mesh.rotation.y += 0.01;
           //cube.rotation.z += 0.01;
 
           renderer.render( scene, camera );
           
       };
+      initMesh();
       render();
     </script>
 
