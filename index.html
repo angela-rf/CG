@@ -4,11 +4,77 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <title>YADJ</title>
+    <script src="js/jquery-1.4.3.min.js"></script>
     <script src="js/three.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.3.min.js"></script>
+    <script src="js/libs/stats.min.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/KeyboardState.js"></script>
-    <script src="js/libs/stats.min.js"></script>
+    <script src="js/cufon-yui.js"></script>
+    <script src="js/blox.font.js"></script>
+    <script src="js/main.js"></script>
+    <style>
+      body {margin: 0; padding: 0; overflow: hidden;}
+
+      #menu {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+
+        top: 50%; left: 50%;
+        margin: -125px 0 0 -100px;
+
+        text-align: center;
+
+        border: 3px solid #fff;
+        border-radius: 15px;
+
+        background-color: #6666ff;
+        box-shadow: 2px 10px 5px #888;
+      }
+
+      #menu p {font-weight: bold; color: #fff;}
+
+      #menu h1 {font-size: 40px;}
+
+      #menu button {
+        width: 80px;
+        height: 25px;
+
+        background-color: #1aff1a;
+
+        border: 3px solid #fff;
+        border-radius: 5px;
+
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+      }
+
+      #score {
+        position: absolute;
+        width: 100px;
+        height: 16px;
+
+        padding: 12px;
+
+        top: 20px;
+        left: 100px;
+
+        border: 2px solid #fff;
+        border-radius: 15px;
+
+        background-color: #6666ff;
+        box-shadow: 2px 8px 5px #888;
+
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+
+        text-align: right;
+
+        display: none;
+      }
+        </style>
    </head>
   <body>
     <header>
@@ -21,201 +87,24 @@
 
       </nav>
     </header>
-
-    <script>
-      $(document).ready(function() {
-        //Gambis - Ângela
-        $("canvas").css("height", "570px");
-        $("canvas").css("width", "90%");
-        $("canvas").css("margin-left", "5%");
-        $("canvas").css("margin-top", "-20px");
-      });
-
-      var camera, scene, renderer, esfera;
-      var clock = new THREE.Clock();
-      var keyboard = new KeyboardState();
-      var x;
-
-      init();
-      animate();
-
-      function init(){
-        container = document.createElement( 'div' );
-        document.body.appendChild( container );
-
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-            camera.position.z = 80;
-            camera.position.y = 25;
-
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            renderer.setClearColor(0xDEFBFF, 1);
-
-            container.appendChild( renderer.domElement );
-
-            /*var spotLight = new THREE.SpotLight( 0xffffff );
-            spotLight.position.set( 0, 0, 80 );
-            scene.add( spotLight );*/
-            var ambientLight = new THREE.AmbientLight(0xDCDCDC);
-            scene.add(ambientLight);
-
-            var geometry = new THREE.SphereGeometry(4, 20, 20);
-            //var material = new THREE.MeshPhongMaterial();
-            //var material = new THREE.MeshNormalMaterial();
-            var loader = new THREE.TextureLoader();
-            var material = new THREE.MeshLambertMaterial({
-              color: 0x0F014A,
-            });
-            esfera = new THREE.Mesh( geometry, material );
-            esfera.position.x = 0;
-            esfera.position.y= -1;
-            esfera.position.z = 0;
-
-
-            var cubeGeometry = new THREE.BoxGeometry(4, 4, 4)
-            var cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-            cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-            cube.position.x = 30;
-            cube.position.y = 30;
-            cube.position.z = 0;
-            scene.add(cube);
-
-            scene.add( esfera );
-
-
-        var luz = new THREE.SpotLight( 0xffffff );
-        luz.position.set( 200, 250, 200 );
-        scene.add( luz );
-
-        var loader = new THREE.JSONLoader();
-        loader.load( 'obj/cloud2.json', function (geometry) {
-          // adjust color a bit
-
-          var faceMaterial = new THREE.MeshPhongMaterial( {
-              color: 0xffffff,
-              morphTargets: true,
-              morphNormals: true,
-              vertexColors: THREE.FaceColors,
-              shading: THREE.SmoothShading
-           });
-          nuvem = new THREE.Mesh( geometry, faceMaterial );
-          nuvem.position.set( 20, 20, -5 );
-          nuvem.scale.set(5,4,4);
-
-          scene.add( nuvem );
-
-        });
-
-        loader.load( 'obj/cloud2.json', function (geometry) {
-          // adjust color a bit
-
-          var faceMaterial = new THREE.MeshPhongMaterial( {
-              color: 0xffffff,
-              morphTargets: true,
-              morphNormals: true,
-              vertexColors: THREE.FaceColors,
-              shading: THREE.SmoothShading
-           });
-          nuvem2 = new THREE.Mesh( geometry, faceMaterial );
-          nuvem2.position.set( -35, 10, 0 );
-          nuvem2.scale.set(5,4,4);
-
-          scene.add( nuvem2 );
-
-        });
-
-        loader.load( 'obj/cloud2.json', function (geometry) {
-          // adjust color a bit
-
-          var faceMaterial = new THREE.MeshPhongMaterial( {
-              color: 0xffffff,
-              morphTargets: true,
-              morphNormals: true,
-              vertexColors: THREE.FaceColors,
-              shading: THREE.SmoothShading
-           });
-          nuvem3 = new THREE.Mesh( geometry, faceMaterial );
-          nuvem3.position.set( -25, 35, 0 );
-          nuvem3.scale.set(5,4,4);
-
-          scene.add( nuvem3 );
-
-        });
-
-        loader.load( 'obj/coin.json', function (geometry) {
-          // adjust color a bit
-
-          var faceMaterial = new THREE.MeshPhongMaterial( {
-              color: 0xB2A41B,
-              morphTargets: true,
-              morphNormals: true,
-              vertexColors: THREE.FaceColors,
-              shading: THREE.FlatShading
-           });
-          moeda = new THREE.Mesh( geometry, faceMaterial );
-          moeda.position.set( -28, 19, -1 );
-          moeda.scale.set(2.5,2.5,2.5);
-          moeda.rotation.x = -80;
-
-          scene.add( moeda );
-
-        });
-
-      loader.load( 'obj/coin.json', function (geometry) {
-        // adjust color a bit
-
-        var faceMaterial = new THREE.MeshPhongMaterial( {
-            color: 0xB2A41B,
-            morphTargets: true,
-            morphNormals: true,
-            vertexColors: THREE.FaceColors,
-            shading: THREE.FlatShading
-         });
-        moeda2 = new THREE.Mesh( geometry, faceMaterial );
-        moeda2.position.set( -15, 45, -1 );
-        moeda2.scale.set(2.5,2.5,2.5);
-        moeda2.rotation.x = -80;
-
-        scene.add( moeda2 );
-      });
-
-      }
-
-      function animate() {
-        requestAnimationFrame( animate );
-        render();
-        update()
-
-      }
-
-      function update() {
-        keyboard.update();
-
-        var moveDistance = 50 * clock.getDelta();
-
-        if (keyboard.pressed("A"))
-          esfera.translateX(-moveDistance);
-
-        if (keyboard.pressed("D"))
-          esfera.translateX(moveDistance);
-      }
-      var limite, i, constante = 0;
-      function render(){
-        renderer.clear();
-        // esfera.rotation.x += 0.01;
-        // esfera.rotation.y += 0.01;
-        cube.rotation.y += 0.01;
-        moeda.rotation.z +=0.007;
-        moeda2.rotation.z +=0.007;
-
-        renderer.render(scene, camera);
-      }
-    </script>
-
+    <div id="menu">
+      <h1>YADJ</h1>
+      <p>
+        Movement: WASD<br>
+        Jump: Spacebar<br>
+      </p>
+      <button id="play_button">Play</button>
+    </div>
+    <div id="score">
+      0
+    </div>
     <footer>
       <p><b>Computação Gráfica - <i>UFSCar Sorocaba</i></b></p>
     </footer>
+
+    <script>
+      Cufon.replace('#menu h1');
+      Cufon.replace('#score');
+    </script>
   </body>
 </html>
