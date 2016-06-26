@@ -51,18 +51,28 @@ YADJ.init = function() {
   YADJ.stats.domElement.style.left = '10px';
   document.body.appendChild(YADJ.stats.domElement);
 
-  var ambientLight = new THREE.AmbientLight(0xDCDCDC);
+  // Phong shader
+  YADJ.phongShader = THREE.ShaderLib.phong;
+  YADJ.phongUniforms = THREE.UniformsUtils.clone(YADJ.phongShader.uniforms);
+
+  var ambientLight = new THREE.AmbientLight(0x353535);
   YADJ.scene.add(ambientLight);
 
-  var textureLoader = new THREE.TextureLoader();
+  YADJ.textureLoader = new THREE.TextureLoader();
   var jsonLoader = new THREE.JSONLoader();
 
   var playerGeometry = new THREE.SphereGeometry(4, 20, 20);
-  var enemyGeometry = new THREE.BoxGeometry(4, 4, 4);
   var platformGeometry = new THREE.BoxGeometry(10, 1, 1);
 
-  var playerMaterial = new THREE.MeshLambertMaterial({color: 0x0F014A});
-  var enemyMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+  // var playerMaterial = new THREE.MeshLambertMaterial({color: 0x0F014A});
+  var playerMaterial = new THREE.ShaderMaterial({
+      uniforms: YADJ.phongUniforms,
+      vertexShader: YADJ.phongShader.vertexShader,
+      fragmentShader: YADJ.phongShader.fragmentShader,
+      lights:true,
+      fog: true,
+      // color: 0x0F014A
+    });
   var platformMaterial = new THREE.MeshPhongMaterial( {
       color: 0xffffff,
       morphTargets: true,
@@ -72,7 +82,7 @@ YADJ.init = function() {
    });
 
   YADJ.player = new THREE.Mesh(playerGeometry, playerMaterial);
-  YADJ.enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+  YADJ.enemy = YADJ.buildEnemy();
   YADJ.platform = new THREE.Mesh(platformGeometry, platformMaterial);
 
 
@@ -80,15 +90,16 @@ YADJ.init = function() {
   YADJ.player.position.y = 5;
   YADJ.player.position.z = 0;
 
-  YADJ.enemy.position.x = 27;
+  YADJ.enemy.position.x = 25;
   YADJ.enemy.position.y = 30;
   YADJ.enemy.position.z = 0;
+  YADJ.enemy.scale.set(2,2,2);
 
   YADJ.platform.position.set(27, 27, 0);
   YADJ.platform.scale.set(2,1,1);
 
   YADJ.light = new THREE.SpotLight(0xffffff);
-  YADJ.light.position.set(200, 250, 200);
+  YADJ.light.position.set(150, 150, 200);
 
   YADJ.scene.add(YADJ.player);
   YADJ.scene.add(YADJ.enemy);
@@ -117,36 +128,67 @@ YADJ.init = function() {
   });
 };
 
+YADJ.buildEnemy = (function() {
+    var _geo = null;
+
+    // Share the same geometry across all planar objects
+    function getPlaneGeometry() {
+        if(_geo == null) {
+            _geo = new THREE.PlaneGeometry(6, 6);
+        }
+
+        return _geo;
+    };
+
+    return function() {
+        var g = getPlaneGeometry();
+        var creatureImage = YADJ.textureLoader.load('img/enemy.png');
+        creatureImage.magFilter = THREE.NearestFilter;
+        var mat = new THREE.ShaderMaterial({
+            uniforms: {
+                color: {type: 'f', value: 0.0},
+                evilCreature: {type: 't', value: creatureImage}
+            },
+            vertexShader: document.
+                          getElementById('vertShader').text,
+            fragmentShader: document.
+                            getElementById('fragShader').text,
+            transparent: true
+        });
+
+        var obj = new THREE.Mesh(g, mat);
+        return obj;
+    }
+})();
+
 YADJ.start = function() {
   document.getElementById("menu").style.display = "none";
   document.querySelector("footer").style.display = "none";
   YADJ.scoreDOM = document.getElementById("score");
   YADJ.scoreDOM.style.display = "block";
 
+  YADJ.step = 0
+
   YADJ.animate();
 };
 
 YADJ.animate = function() {
-  var time = Date.now();
-  YADJ.frameTime = time - YADJ._lastFrameTime;
-  YADJ._lastFrameTime = time;
-  YADJ.cumulatedFrameTime += YADJ.frameTime;
+  YADJ.step += 0.03;
+  YADJ.enemy.position.x = 27 + (6.8 * (Math.cos(YADJ.step)));
+  YADJ.enemy.position.y = 30 + (5 * Math.abs(Math.sin(YADJ.step)));
 
-  while(YADJ.cumulatedFrameTime > YADJ.gameStepTime) {
-    // block movement will go here
-    YADJ.cumulatedFrameTime -= YADJ.gameStepTime;
-  }
-
-  YADJ.enemy.rotation.y += 0.03;
+  // YADJ.enemy.rotation.y += 0.03;
   YADJ.coin.rotation.z += 0.04;
   YADJ.coin.rotation.y += 0.04;
+
+  var c = 0.5+0.5*Math.cos(new Date().getTime()/1000.0 * Math.PI);
+  YADJ.enemy.material.uniforms.color.value = c;
 
   YADJ.renderer.render(YADJ.scene, YADJ.camera);
 
   YADJ.stats.update();
 
   if(!YADJ.gameOver) window.requestAnimationFrame(YADJ.animate);
-  // YADJ.render();
   YADJ.update();
 };
 
@@ -160,11 +202,6 @@ YADJ.update = function() {
 
   if (YADJ.keyboard.pressed("D"))
     YADJ.player.translateX(moveDistance);
-};
-
-YADJ.render = function() {
-  YADJ.renderer.clear();
-  YADJ.renderer.render(YADJ.scene, YADJ.camera);
 };
 
 window.addEventListener("load", YADJ.init);
