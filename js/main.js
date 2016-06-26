@@ -62,7 +62,6 @@ YADJ.init = function() {
   var jsonLoader = new THREE.JSONLoader();
 
   var playerGeometry = new THREE.SphereGeometry(4, 20, 20);
-  var platformGeometry = new THREE.BoxGeometry(10, 1, 1);
 
   // var playerMaterial = new THREE.MeshLambertMaterial({color: 0x0F014A});
   var playerMaterial = new THREE.ShaderMaterial({
@@ -73,18 +72,64 @@ YADJ.init = function() {
       fog: true,
       // color: 0x0F014A
     });
+
+  // Bezier curve spline
+  // YADJ.curve = new THREE.QuadraticBezierCurve(
+  //   new THREE.Vector3(-10, 0, 0),
+  //   new THREE.Vector3(0, 12, 0),
+  //   new THREE.Vector3(10, 0, 0)
+  // );
+  // var curveMaterial = new THREE.LineBasicMaterial({color: 0xff0000});
+  // var path = new THREE.Path(YADJ.curve.getPoints(50));
+  // var curveGeometry = path.createPointsGeometry(50);
+
+  // //Create the final Object3d to add to the scene
+  // var curveObject = new THREE.Line(curveGeometry, curveMaterial);
+  // curveObject.position.set(27, 27.6, 0);
+  // YADJ.scene.add(curveObject);
+
+  // Heart Shape created with Bezier Curves
+  var heartShape = new THREE.Shape();
+  var x = 0, y = 0;
+  heartShape.moveTo(x + 25, y + 25);
+  heartShape.bezierCurveTo(x + 25, y + 25, x + 20, y, x, y);
+  heartShape.bezierCurveTo(x - 30, y, x - 30, y + 35,x - 30,y + 35);
+  heartShape.bezierCurveTo(x - 30, y + 55, x - 10, y + 77, x + 25, y + 95);
+  heartShape.bezierCurveTo(x + 60, y + 77, x + 80, y + 55, x + 80, y + 35);
+  heartShape.bezierCurveTo(x + 80, y + 35, x + 80, y, x + 50, y);
+  heartShape.bezierCurveTo(x + 35, y, x + 25, y + 25, x + 25, y + 25);
+  var extrudeSettings = {amount: 8, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1};
+
+  var heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+  YADJ.heartObject = new THREE.Mesh(heartGeometry, new THREE.MeshPhongMaterial({color: 0xf00000}));
+  YADJ.heartObject.position.set(-30, 20, 0);
+  YADJ.heartObject.rotation.set(0, 0, Math.PI);
+  YADJ.heartObject.scale.set(0.05, 0.05, 0.05);
+  YADJ.scene.add(YADJ.heartObject);
+
+
+  // Platforms
   var platformMaterial = new THREE.MeshPhongMaterial( {
-      color: 0xffffff,
+      color: 0x2082A3,
       morphTargets: true,
       morphNormals: true,
       vertexColors: THREE.FaceColors,
       shading: THREE.SmoothShading
    });
+  var platformGeometry = new THREE.BoxGeometry(10, 1, 1);
+  YADJ.platform1 = new THREE.Mesh(platformGeometry, platformMaterial);
+  YADJ.platform2 = new THREE.Mesh(platformGeometry, platformMaterial);
+  YADJ.platform3 = new THREE.Mesh(platformGeometry, platformMaterial);
+
+  YADJ.platform1.position.set(27, 27, 0);
+  YADJ.platform1.scale.set(2,1,1);
+  YADJ.platform2.position.set(-15, 40, 0);
+  YADJ.platform2.scale.set(2,1,1);
+  YADJ.platform3.position.set(-30, 13, 0);
+  YADJ.platform3.scale.set(2,1,1);
 
   YADJ.player = new THREE.Mesh(playerGeometry, playerMaterial);
   YADJ.enemy = YADJ.buildEnemy();
-  YADJ.platform = new THREE.Mesh(platformGeometry, platformMaterial);
-
 
   YADJ.player.position.x = 0;
   YADJ.player.position.y = 5;
@@ -95,16 +140,15 @@ YADJ.init = function() {
   YADJ.enemy.position.z = 0;
   YADJ.enemy.scale.set(2,2,2);
 
-  YADJ.platform.position.set(27, 27, 0);
-  YADJ.platform.scale.set(2,1,1);
-
   YADJ.light = new THREE.SpotLight(0xffffff);
   YADJ.light.position.set(150, 150, 200);
 
   YADJ.scene.add(YADJ.player);
   YADJ.scene.add(YADJ.enemy);
   YADJ.scene.add(YADJ.light);
-  YADJ.scene.add(YADJ.platform);
+  YADJ.scene.add(YADJ.platform1);
+  YADJ.scene.add(YADJ.platform2);
+  YADJ.scene.add(YADJ.platform3);
 
   jsonLoader.load('obj/coin.json', function (coinGeometry) {
     var coinMaterial = new THREE.MeshPhongMaterial( {
@@ -177,7 +221,7 @@ YADJ.animate = function() {
   YADJ.enemy.position.x = 27 + (6.8 * (Math.cos(YADJ.step)));
   YADJ.enemy.position.y = 30 + (5 * Math.abs(Math.sin(YADJ.step)));
 
-  // YADJ.enemy.rotation.y += 0.03;
+  YADJ.heartObject.rotation.y += 0.03;
   YADJ.coin.rotation.z += 0.04;
   YADJ.coin.rotation.y += 0.04;
 
