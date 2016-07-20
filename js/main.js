@@ -241,11 +241,17 @@ YADJ.update = function() {
 
   var moveDistance = 50 * YADJ.clock.getDelta();
 
-  if (YADJ.keyboard.pressed("A"))
+  if (YADJ.keyboard.pressed("A") || YADJ.keyboard.pressed("left"))
     YADJ.player.translateX(-moveDistance);
 
-  if (YADJ.keyboard.pressed("D"))
+  if (YADJ.keyboard.pressed("D") || YADJ.keyboard.pressed("right"))
     YADJ.player.translateX(moveDistance);
+
+  if (YADJ.keyboard.pressed("W") || YADJ.keyboard.pressed("up") || YADJ.keyboard.pressed("space"))
+    YADJ.player.translateY(moveDistance);
+
+  if (YADJ.keyboard.pressed("S") || YADJ.keyboard.pressed("down"))
+    YADJ.player.translateY(-moveDistance);
 };
 
 window.addEventListener("load", YADJ.init);
