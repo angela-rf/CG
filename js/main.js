@@ -107,7 +107,6 @@ YADJ.init = function() {
   YADJ.heartObject.scale.set(0.05, 0.05, 0.05);
   YADJ.scene.add(YADJ.heartObject);
 
-
   // Platforms
   var platformMaterial = new THREE.MeshPhongMaterial( {
       color: 0x2082A3,
@@ -234,6 +233,7 @@ YADJ.animate = function() {
 
   if(!YADJ.gameOver) window.requestAnimationFrame(YADJ.animate);
   YADJ.update();
+  TWEEN.update();
 };
 
 YADJ.update = function() {
@@ -246,6 +246,15 @@ YADJ.update = function() {
 
   if (YADJ.keyboard.pressed("D"))
     YADJ.player.translateX(moveDistance);
+
+  if (YADJ.keyboard.down("space")) {
+    new TWEEN
+      .Tween({jump: 0})
+      .to({jump: 3}, 700)
+      .onUpdate(function () {
+        YADJ.player.position.y = 20* Math.sin(this.jump) + 2;
+      }).start();
+  }
 };
 
 window.addEventListener("load", YADJ.init);
