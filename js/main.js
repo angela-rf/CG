@@ -215,6 +215,7 @@ YADJ.start = function() {
   YADJ.animate();
 };
 
+
 YADJ.animate = function() {
   YADJ.step += 0.03;
   YADJ.enemy.position.x = 27 + (6.8 * (Math.cos(YADJ.step)));
@@ -248,13 +249,37 @@ YADJ.update = function() {
     YADJ.player.translateX(moveDistance);
 
   if (YADJ.keyboard.down("space")) {
-    new TWEEN
+   var x = new TWEEN
       .Tween({jump: 0})
       .to({jump: 3}, 700)
       .onUpdate(function () {
         YADJ.player.position.y = 20* Math.sin(this.jump) + 2;
+        console.log(YADJ.player.position.y); //Apagar depois
+        if (YADJ.player.position.y >= 16 && //posicao da plataforma 3 YADJ.platform3.position.x + 3 
+            YADJ.player.position.y <=  17 && //YADJ.platform3.position.x + 4
+            YADJ.player.position.x <= -18 && //YADJ.platform3.position.x + 12 &&
+            YADJ.player.position.x  >= -38 //YADJ.platform3.position.x - 8
+             ){
+            x.stop();
+            YADJ.player.position.y = 17.3;       
+        };
       }).start();
   }
+ 
+  //console.log("X:"+YADJ.player.position.x); //Apagar depois -30
+  //console.log(YADJ.player.position.y); //Apagar depois 17
+  //console.log(YADJ.player.position.z); //Apagar depois 0
+
+  //Posicao aproximada do coracao
+  if(YADJ.player.position.x <= -23 && YADJ.player.position.x >= -37 &&
+     YADJ.player.position.y >= 17 && YADJ.player.position.y <=20){
+    
+     console.log("Achou o coracao");//Apagar depois
+     YADJ.heartObject.position.y = -15; //Fora da tela
+    
+    };
+
+
 };
 
 window.addEventListener("load", YADJ.init);
