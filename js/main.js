@@ -240,6 +240,7 @@ YADJ.update = function() {
   YADJ.keyboard.update();
 
   var moveDistance = 50 * YADJ.clock.getDelta();
+  var jump = 13;
 
   if (YADJ.keyboard.pressed("A") || YADJ.keyboard.pressed("left"))
     YADJ.player.translateX(-moveDistance);
@@ -247,11 +248,22 @@ YADJ.update = function() {
   if (YADJ.keyboard.pressed("D") || YADJ.keyboard.pressed("right"))
     YADJ.player.translateX(moveDistance);
 
+  if(YADJ.keyboard.down("W") || YADJ.keyboard.down("up") || YADJ.keyboard.down("space")){
+    YADJ.player.translateY(jump);
+
+    YADJ.camera.position.y = YADJ.player.position.y;
+  }
+    
+
+
+  /*
   if (YADJ.keyboard.pressed("W") || YADJ.keyboard.pressed("up") || YADJ.keyboard.pressed("space"))
     YADJ.player.translateY(moveDistance);
 
+  
   if (YADJ.keyboard.pressed("S") || YADJ.keyboard.pressed("down"))
     YADJ.player.translateY(-moveDistance);
+  */
 };
 
 window.addEventListener("load", YADJ.init);
