@@ -112,7 +112,8 @@ YADJ.init = function() {
   var extrudeSettings = {amount: 8, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1};
 
   var heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
-  YADJ.heartObject = new THREE.Mesh(heartGeometry, new THREE.MeshPhongMaterial({color: 0xf00000}));
+  YADJ.heartObject = new Physijs.BoxMesh(heartGeometry, new THREE.MeshPhongMaterial({color: 0xf00000}), 0);
+  YADJ.heartObject.isBonus = true;
   YADJ.heartObject.position.set(-30, 20, 0);
   YADJ.heartObject.rotation.set(0, 0, Math.PI);
   YADJ.heartObject.scale.set(0.05, 0.05, 0.05);
@@ -240,7 +241,7 @@ YADJ.animate = function() {
   YADJ.enemy.position.x = 27 + (6.8 * (Math.cos(YADJ.step)));
   YADJ.enemy.position.y = 30 + (5 * Math.abs(Math.sin(YADJ.step)));
 
-  YADJ.heartObject.rotation.y += 0.03;
+  // YADJ.heartObject.rotation.y += 0.3;
   YADJ.coin.rotation.z += 0.04;
   YADJ.coin.rotation.y += 0.04;
 
