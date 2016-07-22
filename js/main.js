@@ -12,6 +12,9 @@ if (!window.requestAnimationFrame) {
 
 var YADJ = {};
 
+Physijs.scripts.worker = '/js/physijs_worker.js';
+Physijs.scripts.ammo = '/js/ammo.js';
+
 YADJ.init = function() {
   // scene size
   var WIDTH = window.innerWidth,
@@ -26,7 +29,8 @@ YADJ.init = function() {
   // WebGL renderer, camera and scene
   YADJ.renderer = new THREE.WebGLRenderer();
   YADJ.camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-  YADJ.scene = new THREE.Scene();
+  YADJ.scene = new Physijs.Scene;
+  YADJ.scene.setGravity(new THREE.Vector3(0, -12, 0));
 
   // Set camera position
   YADJ.camera.position.z = 80;
@@ -73,6 +77,13 @@ YADJ.init = function() {
       // color: 0x0F014A
     });
 
+  YADJ.ground = new Physijs.PlaneMesh(
+    new THREE.PlaneGeometry(1e6, 1e6),
+    new THREE.MeshBasicMaterial({color: 0xDEFBFF})
+  );
+  YADJ.ground.rotation.x = -Math.PI/2;
+  YADJ.scene.add(YADJ.ground);
+
   // Bezier curve spline
   // YADJ.curve = new THREE.QuadraticBezierCurve(
   //   new THREE.Vector3(-10, 0, 0),
@@ -116,9 +127,9 @@ YADJ.init = function() {
       shading: THREE.SmoothShading
    });
   var platformGeometry = new THREE.BoxGeometry(10, 1, 1);
-  YADJ.platform1 = new THREE.Mesh(platformGeometry, platformMaterial);
-  YADJ.platform2 = new THREE.Mesh(platformGeometry, platformMaterial);
-  YADJ.platform3 = new THREE.Mesh(platformGeometry, platformMaterial);
+  YADJ.platform1 = new Physijs.BoxMesh(platformGeometry, platformMaterial, 0);
+  YADJ.platform2 = new Physijs.BoxMesh(platformGeometry, platformMaterial, 0);
+  YADJ.platform3 = new Physijs.BoxMesh(platformGeometry, platformMaterial, 0);
 
   YADJ.platform1.position.set(27, 27, 0);
   YADJ.platform1.scale.set(2,1,1);
@@ -127,12 +138,21 @@ YADJ.init = function() {
   YADJ.platform3.position.set(-30, 13, 0);
   YADJ.platform3.scale.set(2,1,1);
 
-  YADJ.player = new THREE.Mesh(playerGeometry, playerMaterial);
-  YADJ.enemy = YADJ.buildEnemy();
+  YADJ.player = new Physijs.SphereMesh(playerGeometry, playerMaterial);
+  YADJ.player.setAngularFactor(new THREE.Vector3( 0, 0, 0 ));
+  YADJ.player.setLinearFactor(new THREE.Vector3(1, 1, 0));
+  YADJ.player.addEventListener('collision', function(object) {
+    if(object.isBonus) {
+      YADJ.scene.remove(object);
+    }
+    if(object.isEnemy) {
+      YADJ.gameOver = true;
+    }
+  })
+  YADJ.player.position.set(0, 4, 0);
+  YADJ.player.__dirtyPosition = true;
 
-  YADJ.player.position.x = 0;
-  YADJ.player.position.y = 5;
-  YADJ.player.position.z = 0;
+  YADJ.enemy = YADJ.buildEnemy();
 
   YADJ.enemy.position.x = 25;
   YADJ.enemy.position.y = 30;
@@ -215,7 +235,6 @@ YADJ.start = function() {
   YADJ.animate();
 };
 
-
 YADJ.animate = function() {
   YADJ.step += 0.03;
   YADJ.enemy.position.x = 27 + (6.8 * (Math.cos(YADJ.step)));
@@ -233,6 +252,7 @@ YADJ.animate = function() {
   YADJ.stats.update();
 
   if(!YADJ.gameOver) window.requestAnimationFrame(YADJ.animate);
+  YADJ.scene.simulate();
   YADJ.update();
   TWEEN.update();
 };
@@ -240,46 +260,22 @@ YADJ.animate = function() {
 YADJ.update = function() {
   YADJ.keyboard.update();
 
-  var moveDistance = 50 * YADJ.clock.getDelta();
+  var moveDistance = 500 * YADJ.clock.getDelta();
 
   if (YADJ.keyboard.pressed("A"))
-    YADJ.player.translateX(-moveDistance);
+    YADJ.player.setLinearVelocity(new THREE.Vector3(-18, YADJ.player.getLinearVelocity().y, 0));
+
+  if (YADJ.keyboard.up("A"))
+    YADJ.player.setLinearVelocity(new THREE.Vector3(0, YADJ.player.getLinearVelocity().y, 0));
 
   if (YADJ.keyboard.pressed("D"))
-    YADJ.player.translateX(moveDistance);
+    YADJ.player.setLinearVelocity(new THREE.Vector3(18, YADJ.player.getLinearVelocity().y, 0));
 
-  if (YADJ.keyboard.down("space")) {
-   var x = new TWEEN
-      .Tween({jump: 0})
-      .to({jump: 3}, 700)
-      .onUpdate(function () {
-        YADJ.player.position.y = 20* Math.sin(this.jump) + 2;
-        console.log(YADJ.player.position.y); //Apagar depois
-        if (YADJ.player.position.y >= 16 && //posicao da plataforma 3 YADJ.platform3.position.x + 3 
-            YADJ.player.position.y <=  17 && //YADJ.platform3.position.x + 4
-            YADJ.player.position.x <= -18 && //YADJ.platform3.position.x + 12 &&
-            YADJ.player.position.x  >= -38 //YADJ.platform3.position.x - 8
-             ){
-            x.stop();
-            YADJ.player.position.y = 17.3;       
-        };
-      }).start();
-  }
- 
-  //console.log("X:"+YADJ.player.position.x); //Apagar depois -30
-  //console.log(YADJ.player.position.y); //Apagar depois 17
-  //console.log(YADJ.player.position.z); //Apagar depois 0
+  if (YADJ.keyboard.up("D"))
+    YADJ.player.setLinearVelocity(new THREE.Vector3(0, YADJ.player.getLinearVelocity().y, 0));
 
-  //Posicao aproximada do coracao
-  if(YADJ.player.position.x <= -23 && YADJ.player.position.x >= -37 &&
-     YADJ.player.position.y >= 17 && YADJ.player.position.y <=20){
-    
-     console.log("Achou o coracao");//Apagar depois
-     YADJ.heartObject.position.y = -15; //Fora da tela
-    
-    };
-
-
+  if (YADJ.keyboard.down("space"))
+    YADJ.player.applyCentralImpulse({x: null, y: 5000, z: null});
 };
 
 window.addEventListener("load", YADJ.init);
