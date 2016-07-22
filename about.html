@@ -2,8 +2,11 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="css/style.css">    
-    <title>Nabos</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/cufon-yui.js"></script>
+    <script src="js/blox.font.js"></script>
+        
+    <title>YADJ</title>
   </head>
   <body>
     <header>
@@ -17,11 +20,49 @@
       </nav>
     </header>
       <div id="content">
-        Trabalho desenvolvido na disciplina de Computação Gráfica da UFSCar Sorocaba. Blablabla
+        <h1>YADJ</h1>
+        <p>Trabalho desenvolvido na disciplina de Computação Gráfica da UFSCar Sorocaba. O objetivo é desenvolver um pequeno jogo utilizando WebGL explorando as transformações vistas em sala de aula. Baixe a documentação da fase final <a href = "doc/documentacao.pdf" >aqui</a>.</p>
+        <p>Desenvolvedores:</p>
+        <div id="developers" >
+          <div id="charles">
+            <img src="img/charles.jpg"/>
+            <br>Charles David de Moraes - RA: 489662
+          </div>
+          <div id="angela">
+            <img src="img/angela.jpg"/>
+            <br>Ângela Rodrigues Ferreira - RA: 552070
+          </div>
+        </div>
       </div>
     <footer>
       <p><b>Computação Gráfica - <i>UFSCar Sorocaba</i></b></p>
     </footer>
+    <script>
+      Cufon.replace('#content h1');
+    </script>
+    <script id="vertShader" type="shader">
+    varying vec2 vUv;
+    void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix *
+                      modelViewMatrix * vec4(position, 1.0 );
+    }
+    </script>
+    <script id="fragShader" type="shader">
+    precision highp float;
+
+    varying vec2 vUv;
+    uniform float color;
+    // Name it whatever it was named in the uniforms object
+    uniform sampler2D evilCreature;
+
+    void main(void) {
+        // Standard sampling procedure. Just make sure
+        // you've passed the uv coords varying.
+        gl_FragColor = texture2D(evilCreature, vUv);
+    }
+    </script>
+
   </body>
 </html>
 
